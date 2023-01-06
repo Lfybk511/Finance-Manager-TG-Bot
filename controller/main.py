@@ -13,18 +13,9 @@ from utils.categories import Categories
 logging.basicConfig(level=logging.INFO)
 # TELEGRAM_API_TOKEN
 
-API_TOKEN = "5980027616:AAHqC1Ux43-Zw6REeNTAMZidYXqqa6WEMaE"
-#TELEGRAM_API_TOKEN
-# PROXY_URL = os.getenv("TELEGRAM_PROXY_URL")
-# PROXY_AUTH = aiohttp.BasicAuth(
-#     login=os.getenv("TELEGRAM_PROXY_LOGIN"),
-#     password=os.getenv("TELEGRAM_PROXY_PASSWORD")
-# )
-# ACCESS_ID = os.getenv("TELEGRAM_ACCESS_ID")
-
+API_TOKEN = TELEGRAM_API_TOKEN
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
-#dp.middleware.setup(AccessMiddleware(ACCESS_ID))
 
 
 @dp.message_handler(commands=['start', 'help'])
