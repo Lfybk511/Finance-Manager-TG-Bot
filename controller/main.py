@@ -13,6 +13,7 @@ from utils.categories import Categories
 logging.basicConfig(level=logging.INFO)
 # TELEGRAM_API_TOKEN
 
+<<<<<<< HEAD
 API_TOKEN = "TELEGRAM_API_TOKEN"
 #TELEGRAM_API_TOKEN
 # PROXY_URL = os.getenv("TELEGRAM_PROXY_URL")
@@ -22,9 +23,11 @@ API_TOKEN = "TELEGRAM_API_TOKEN"
 # )
 # ACCESS_ID = os.getenv("TELEGRAM_ACCESS_ID")
 
+=======
+API_TOKEN = TELEGRAM_API_TOKEN
+>>>>>>> 5564b784d390cf09f680773e3dcdde124b15e58f
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
-#dp.middleware.setup(AccessMiddleware(ACCESS_ID))
 
 @dp.message_handler(commands=["start"])
 async def send_welcome(message: types.Message):
