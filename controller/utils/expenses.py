@@ -2,7 +2,7 @@
 import datetime
 import re
 from typing import List, NamedTuple, Optional
-
+from dataclasses import dataclass
 import pytz
 
 from . import db
@@ -10,18 +10,22 @@ from . import exceptions
 from .categories import Categories
 
 
-class PrintCategories(NamedTuple):
+@dataclass
+class PrintCategories():
     amount: int
     category_name: str
 
 
-class Message(NamedTuple):
+
+@dataclass
+class Message():
     """Структура распаршенного сообщения о новом расходе"""
     amount: int
     category_text: str
 
 
-class Expense(NamedTuple):
+@dataclass
+class Expense():
     """Структура добавленного в БД нового расхода"""
     user_id: int
     id: Optional[int]
@@ -49,21 +53,42 @@ def add_expense(raw_message: str, user_ID: int) -> Expense:
                    category_name=category.name)
 
 
-def get_today_statistics(user_ID: int) -> List[PrintCategories]:
+def get_today_statistics(user_ID: int) -> List[List[PrintCategories]]:
     """Возвращает строкой статистику расходов за сегодня"""
     cursor = db.get_cursor()
     result = []
-    for cate in Categories().get_all_categories():
-        #print(cate.codename)
+    for cate in Categories().get_all_categories()[:-1]:
         cursor.execute("select sum(amount) "
                        "from expense where date(created)=date('now', 'localtime') "
                        f"and user_id = {user_ID} "
                        f"and category_codename = '{cate.codename}' ")
         res = cursor.fetchone()
-        #print("cursor.fetchone() ===== ",res[0])
         if res[0]:
             result.append(PrintCategories(amount=int(res[0]), category_name=cate.name))
-    return sorted(result, key=lambda x: -x.amount)
+            result = sorted(result, key=lambda x: -x.amount)
+    ans = []
+    ans.append(result)
+
+    cursor.execute("select sum(amount) "
+                   "from expense where date(created)=date('now', 'localtime') "
+                   f"and user_id = {user_ID} "
+                   "and category_codename != 'saved' ")
+    res = cursor.fetchone()
+
+    if res[0]:
+        ans.append(PrintCategories(amount=int(res[0]), category_name=all))
+
+    cursor.execute("select sum(amount) "
+                   "from expense where date(created)=date('now', 'localtime') "
+                   f"and user_id = {user_ID} "
+                   "and category_codename = 'saved' ")
+    res = cursor.fetchone()
+    if res[0]:
+        ans.append(PrintCategories(amount=int(res[0]), category_name="saved"))
+    else:
+        ans.append(PrintCategories(amount=0, category_name="saved"))
+
+    return ans
 
     if not result[0]:
         return "Сегодня ещё нет расходов"

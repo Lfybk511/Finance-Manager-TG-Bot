@@ -13,7 +13,7 @@ from utils.categories import Categories
 logging.basicConfig(level=logging.INFO)
 # TELEGRAM_API_TOKEN
 
-API_TOKEN = "5980027616:AAHqC1Ux43-Zw6REeNTAMZidYXqqa6WEMaE"
+API_TOKEN = "TELEGRAM_API_TOKEN"
 #TELEGRAM_API_TOKEN
 # PROXY_URL = os.getenv("TELEGRAM_PROXY_URL")
 # PROXY_AUTH = aiohttp.BasicAuth(
@@ -26,13 +26,19 @@ bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 #dp.middleware.setup(AccessMiddleware(ACCESS_ID))
 
-
-@dp.message_handler(commands=['start', 'help'])
+@dp.message_handler(commands=["start"])
 async def send_welcome(message: types.Message):
-    """Отправляет приветственное сообщение и помощь по боту"""
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    buttons = ["/help", "/categories", "/today", "/month", "/expenses"]
+    keyboard.add(*buttons)
+    await message.answer(f"❤️Давай начнем, {message.from_user.username}❤️", reply_markup=keyboard)
+    await send_welcome(message)
+
+@dp.message_handler(commands=[ 'help'])
+async def send_welcome(message: types.Message):
     await message.answer(
         "Бот для учёта ненужных трат\n"
-        "Предотватит бесполезную трату денег\n\n"
+        "Предотвратит бесполезную трату денег\n\n"
         "Добавить расход: 250 сладости\n"
         "Если не потратили деньги на бесполезную покупку: 100 сохранил\n\n"
         "Категории трат: /categories\n"
@@ -64,14 +70,17 @@ async def categories_list(message: types.Message):
 async def today_statistics(message: types.Message):
     """Отправляет сегодняшнюю статистику трат"""
     today_expenses = expenses.get_today_statistics(message.from_user.id)
-    if not today_expenses:
+    if not today_expenses[0]:
         await message.answer("Расходы сегодня не заведены")
         return
+    answer_message = "Траты за сегодня:  " + "".join(f"{today_expenses[1].amount} руб. ")
     today_expenses_rows = [
         f"{expense.amount} руб. на {expense.category_name} "
-        for expense in today_expenses]
-    answer_message = "Траты за сегодня:\n\n* " + "\n\n* " \
+        for expense in today_expenses[0]]
+    answer_message += "\n\n⭕" + "\n\n*❌ " \
         .join(today_expenses_rows)
+
+    answer_message += "\n\n ✅Вы сохранили: " + "".join(f"{today_expenses[2].amount} руб✅")
     await message.answer(answer_message)
 
 
@@ -79,7 +88,7 @@ async def today_statistics(message: types.Message):
 @dp.message_handler(commands=['month'])
 async def month_statistics(message: types.Message):
     """Отправляет статистику трат текущего месяца"""
-    month_expenses = expenses.get_today_statistics(message.from_user.id)
+    month_expenses = expenses.get_month_statistics(message.from_user.id)
     if not month_expenses:
         await message.answer("Расходы за этот месяц не заведены")
         return

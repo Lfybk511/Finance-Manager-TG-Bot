@@ -1,10 +1,11 @@
 """Работа с категориями расходов"""
 from typing import Dict, List, NamedTuple
-
+from dataclasses import dataclass
 from . import db
 
 
-class Category(NamedTuple):
+@dataclass
+class Category():
     """Структура категории"""
     codename: str
     name: str
@@ -32,7 +33,7 @@ class Categories:
         for index, category in enumerate(categories):
             aliases = category["aliases"].split(",")
             aliases = list(filter(None, map(str.strip, aliases)))
-            aliases.append(category["codename"])
+            #aliases.append(category["codename"])
             aliases.append(category["name"])
             categories_result.append(Category(
                 codename=category['codename'],
