@@ -34,7 +34,7 @@ class Categories:
             aliases = category["aliases"].split(",")
             aliases = list(filter(None, map(str.strip, aliases)))
             #aliases.append(category["codename"])
-            aliases.append(category["name"])
+            #aliases.append(category["name"])
             categories_result.append(Category(
                 codename=category['codename'],
                 name=category['name'],
